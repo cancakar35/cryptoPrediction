@@ -1,0 +1,26 @@
+{
+    "ETH" : "Ethereum (ETH)",
+    "BNB" : "Binance Coin (BNB)",
+    "SOL" : "Solana (SOL)",
+    "XRP" : "XRP",
+    "AVAX" : "Avalanche (AVAX)",
+    "ADA" : "Cardano (ADA)",
+    "DOGE" : "Dogecoin (DOGE)",
+    "SHIB" : "Shiba Inu (SHIB)",
+    "TRX" : "TRON (TRX)",
+    "DOT" : "Polkadot (DOT)",
+    "NEAR" : "NEAR",
+    "MATIC" : "POLYGON (MATIC)",
+    "LINK" : "Chainlink (LINK)",
+    "LTC" : "Litecoin (LTC)",
+    "FTM" : "Fantom (FTM)",
+    "APE" : "ApeCoin",
+    "VET" : "VeChain (VET)",
+    "MANA" : "Decentraland (MANA)",
+    "FIL" : "FileCoin (FIL)",
+    "UNI" : "Uniswap (UNI)",
+    "ENJ" : "EnjinCoin (ENJ)",
+    "FTT" : "FTX Token (FTT)",
+    "ONE" : "Harmony (ONE)"
+
+}

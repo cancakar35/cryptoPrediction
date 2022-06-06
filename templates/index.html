@@ -1,0 +1,179 @@
+{% extends "base.html" %} {% block head %}
+<title>Ana Sayfa</title>
+<script>
+  async function verial() {
+    let sembol = document.getElementById("sembol");
+    let birim = document.getElementById("para").value;
+    let aralik = document.getElementById("aralik").value;
+    let periyot = document.getElementById("periyot").value;
+    let grfiyat = document.getElementById("grfiyat");
+    document.getElementById("grbaslik").innerHTML =
+      sembol.options[sembol.selectedIndex].text + "-" + birim;
+    sembol = sembol.value;
+    let res = await fetch(
+      "/verial?smb=" +
+        sembol +
+        "&birim=" +
+        birim +
+        "&aralik=" +
+        aralik +
+        "&per=" +
+        periyot
+    );
+    if (res.ok) {
+      let grjson = await res.json();
+      var fiyatveri = grjson["data"][0];
+      let closearr = Array.from(fiyatveri["close"]);
+      let openarr = Array.from(fiyatveri["open"]);
+      if (closearr[closearr.length - 1] > openarr[openarr.length - 1]) {
+        grfiyat.style.color = "green";
+      } else {
+        grfiyat.style.color = "red";
+      }
+      grfiyat.innerHTML = closearr[closearr.length - 1] + " " + birim;
+      Plotly.newPlot(
+        "grafik",
+        grjson,
+        { autosize: true },
+        { responsive: true }
+      );
+    } else {
+      alert(res.status + " Veriler alınamadı!");
+    }
+  }
+
+  async function grafik() {
+    let sembol = document.getElementById("sembol");
+    let birim = document.getElementById("para").value;
+    let aralik = document.getElementById("aralik").value;
+    let periyot = document.getElementById("periyot").value;
+    let grturu = document.getElementById("grturu").value;
+    let grdiv = document.getElementById("grafik");
+    let grfiyat = document.getElementById("grfiyat");
+    grfiyat.innerHTML = "";
+    grdiv.innerHTML = "";
+    if (grturu == "plotlymum") {
+      verial();
+    } else {
+      document.getElementById("grbaslik").innerHTML =
+        sembol.options[sembol.selectedIndex].text + "-" + birim;
+      sembol = sembol.value;
+      var img = new Image();
+      let res = await fetch(
+        "/grafik?tur=" +
+          grturu +
+          "&smb=" +
+          sembol +
+          "&birim=" +
+          birim +
+          "&aralik=" +
+          aralik +
+          "&per=" +
+          periyot
+      );
+      if (res.ok) {
+        let veriler = res.json();
+        veriler.then(function (data) {
+          if (data["lastclose"] > data["lastopen"]) {
+            grfiyat.style.color = "green";
+          } else {
+            grfiyat.style.color = "red";
+          }
+          grfiyat.innerHTML = data["lastclose"] + " " + birim;
+          img.src = "data:image/png;base64," + data["grafik"];
+          grdiv.innerHTML = "";
+          grdiv.appendChild(img);
+        });
+      } else {
+        alert(res.status + " Veriler alınamadı!");
+      }
+    }
+  }
+</script>
+{% endblock head %} {% block body %}
+<div class="container">
+  <div class="row row-cols-lg-auto g-3 align-items-center">
+    <div class="col">Kripto</div>
+    <div class="col">
+      <select class="form-select" name="sembol" id="sembol">
+        <option value="BTC" selected>Bitcoin (BTC)</option>
+      </select>
+    </div>
+    <div class="col">Aralık</div>
+    <div class="col">
+      <select class="form-select" name="aralik" id="aralik">
+        <option value="1d" selected>1 Gün</option>
+        <option value="4h">4 Saat</option>
+        <option value="1h">1 Saat</option>
+        <option value="30d">30 Dakika</option>
+        <option value="15m">15 Dakika</option>
+        <option value="1m">1 Dakika</option>
+        <option value="7d">1 Hafta</option>
+        <option value="30d">1 Ay</option>
+      </select>
+    </div>
+    <div class="col">Periyot</div>
+    <div class="col">
+      <select class="form-select" name="periyot" id="periyot">
+        <option value="1d">1 Gün</option>
+        <option value="7d">1 Hafta</option>
+        <option value="1mo">1 Ay</option>
+        <option value="3mo" selected>3 Ay</option>
+        <option value="6mo">6 Ay</option>
+        <option value="1y">1 Yıl</option>
+        <option value="2y">2 Yıl</option>
+        <option value="max">Max</option>
+      </select>
+    </div>
+    <div class="col">Para Birimi</div>
+    <div class="col">
+      <select class="form-select" name="para" id="para">
+        <option value="USD" selected>USD $</option>
+        <option value="EUR">EUR €</option>
+        <option value="TRY">TRY ₺</option>
+        <option value="USDT">USDT - Tether</option>
+      </select>
+    </div>
+    <div class="col">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        id="kaydetButton"
+        onclick="grafik()"
+      >
+        Kaydet
+      </button>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col">
+      <h5>Grafik türü</h5>
+      <select class="form-select" name="grtur" id="grturu" onchange="grafik()">
+        <option value="plotlymum" selected>Plotly Mum Grafiği</option>
+        <option value="mplfinance">Matplotlib Mum Grafiği</option>
+        <option value="cizgigr">Çizgi Grafiği</option>
+      </select>
+    </div>
+    <div class="col-md-10">
+      <h2 id="grbaslik">Bitcoin</h2>
+      <h5 id="grfiyat"></h5>
+      <div id="grafik" class="grafik" style="height: 500px"></div>
+    </div>
+  </div>
+</div>
+<script>
+  let select = document.getElementById("sembol");
+  fetch("static/kripto.json")
+    .then((response) => response.json())
+    .then(function (data) {
+      for (let i in data) {
+        select.options[select.options.length] = new Option(data[i], i);
+      }
+      select.options[0].selected = "selected";
+    });
+</script>
+<script>
+  verial();
+</script>
+{% endblock body %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %} {% block head %}
+<title>Kripto Tahmin</title>
+<script>
+  async function tahminveri() {
+    const spinner = document.getElementById("spnr");
+    const kaydetbtn = document.getElementById("kaydetButon");
+    const grafikdiv = document.getElementById("grafik");
+    kaydetbtn.style.display = "none";
+    spinner.style.display = "block";
+    grafikdiv.innerHTML = "";
+    let kripto = document.getElementById("sembol");
+    let aralik = document.getElementById("aralik").value;
+    let birim = document.getElementById("birim").value;
+    const btarih = document.getElementById("btarih");
+    const bkripto = document.getElementById("bkripto");
+    const bsonkapanis = document.getElementById("bsonkapanis");
+    const btahmin = document.getElementById("btahminkapanis");
+    const bsinyal = document.getElementById("bsinyal");
+    const grbaslik = document.getElementById("grbaslik");
+    btarih.innerHTML = "";
+    bkripto.innerHTML = "";
+    bsonkapanis.innerHTML = "";
+    btahmin.innerHTML = "";
+    bsinyal.innerHTML = "";
+    grbaslik.innerHTML = kripto.options[kripto.selectedIndex].text +"-"+birim;
+    kripto = kripto.value;
+    let img = new Image()
+    let res = await fetch("/model?smb="+kripto+"&aralik="+aralik+"&birim="+birim);
+    if (res.ok) {
+      let veriler = res.json()
+      veriler.then(function(data){
+        btarih.innerHTML = data["tarih"];
+        bkripto.innerHTML = data["kripto"];
+        bsonkapanis.innerHTML = data["sonkapanis"];
+        btahmin.innerHTML = data["tahmin"];
+        sgn = data["sinyal"];
+        if (sgn == "AL"){
+          bsinyal.style.color = "green";
+        }
+        else if (sgn == "SAT"){
+          bsinyal.style.color = "red";
+        }
+
+        bsinyal.innerHTML = sgn;
+
+        img.src = "data:image/png;base64," + data["grafik"];
+        grafikdiv.innerHTML = "";
+        grafikdiv.appendChild(img); 
+      });
+    } else {
+      alert(res.status + " Veriler alınamadı!");
+    }
+    kaydetbtn.style.display = "block";
+    spinner.style.display = "none";
+  }
+</script>
+<style>
+  .bilgitag {
+    font-weight: bold;
+  }
+</style>
+{% endblock head %} {% block body %}
+<div class="container">
+  <div class="row row-cols-lg-auto g-3 align-items-center">
+    <div class="col">Kripto</div>
+    <div class="col">
+      <select class="form-select" name="sembol" id="sembol">
+        <option value="BTC" selected>Bitcoin (BTC)</option>
+      </select>
+    </div>
+    <div class="col">Aralık</div>
+    <div class="col">
+      <select class="form-select" name="aralik" id="aralik">
+        <option value="1d" selected>1 Gün</option>
+        <option value="4h">4 Saat</option>
+        <option value="15m">15 Dakika</option>
+      </select>
+    </div>
+    <div class="col">Para Birimi</div>
+    <div class="col">
+      <select class="form-select" name="birim" id="birim">
+        <option value="USD" selected>USD $</option>
+        <option value="EUR">EUR €</option>
+        <option value="TRY">TRY ₺</option>
+        <option value="USDT">USDT - Tether</option>
+      </select>
+    </div>
+    <div class="col">
+      <button type="button" class="btn btn-secondary" id="kaydetButon" onclick="tahminveri()">
+        Kaydet
+      </button>
+    </div>
+    <div class="spinner-border text-dark" role="status" id="spnr" style="display: none;">
+      <span class="sr-only"></span>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col">
+      <h5>Bilgi</h5>
+      <p>Tarih: <span id="btarih" class="bilgitag"></span></p>
+      <p>Kripto: <span id="bkripto" class="bilgitag"></span></p>
+      <p>Son Kapanış: <span id="bsonkapanis" class="bilgitag"></span></p>
+      <p>
+        Tahmini sonraki kapanış:
+        <span id="btahminkapanis" class="bilgitag" style="font-size: 24px"
+          ></span>
+      </p>
+      <p>Sinyal: <span id="bsinyal" class="bilgitag"></span></p>
+    </div>
+    <div class="col-md-8">
+      <h2 id="grbaslik">Bitcoin (BTC)-USD</h2>
+      <div id="grafik" class="grafik" style="height: 500px"></div>
+    </div>
+  </div>
+</div>
+<script>
+  let select = document.getElementById("sembol");
+  fetch("static/kripto.json")
+    .then((response) => response.json())
+    .then(function (data) {
+      for (let i in data) {
+        select.options[select.options.length] = new Option(data[i], i);
+      }
+      select.options[0].selected = "selected";
+    });
+</script>
+<script>tahminveri();</script>
+{% endblock body %}
