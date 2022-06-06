@@ -1,4 +1,4 @@
-# Kritpo Fiyat Tahmin
+# Kripto Fiyat Tahmin
 
 ### Necmettin Erbakan Üniversitesi BIL308 Proje dersi için yapılmıştır.
 
