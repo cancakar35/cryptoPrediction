@@ -20,7 +20,7 @@ from io import BytesIO
 
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-app.secret_key = "ccakar123"
+app.secret_key = "secretkey" # secret_key
 
 
 kayitli_modeller = {
